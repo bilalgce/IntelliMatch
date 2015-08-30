@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.seqhack.intellimatch.models.KeyWords;
+import org.seqhack.intellimatch.models.PersonalityMatch;
 import org.seqhack.intellimatch.models.PersonalityType;
 import org.seqhack.intellimatch.models.Speech;
+import org.seqhack.intellimatch.utilities.DBUtil;
 import org.seqhack.intellimatch.utilities.KeywordsLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +24,7 @@ public class PersonalityTypeController {
 
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(value = HttpStatus.OK)
-	public ResponseEntity<PersonalityType> getType(@RequestBody Speech speech) {
+	public ResponseEntity<PersonalityMatch> getType(@RequestBody Speech speech) {
 
 		String text = speech.getText();
 		String processedText = preprocessText(text);
@@ -44,9 +46,10 @@ public class PersonalityTypeController {
 				matchingWords(processedText, keywords.getJudgerWords()),
 				matchingWords(processedText, keywords.getPerceiverWords()));
 
-		PersonalityType personalityType = new PersonalityType(extraverted,
+		PersonalityMatch personalityType = new PersonalityMatch(extraverted,
 				intuitive, thinking, judgemental);
-		return new ResponseEntity<PersonalityType>(personalityType,
+
+		return new ResponseEntity<PersonalityMatch>(personalityType,
 				HttpStatus.OK);
 
 	}

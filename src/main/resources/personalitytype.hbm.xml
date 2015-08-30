@@ -1,0 +1,18 @@
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.seqhack.intellimatch.models">
+
+	<class name="PersonalityType" table="personality_type">
+		<id name="id" column="Id" />
+		<property name="firstName" column="firstName" />
+		<property name="lastName" column="lastName" />
+		<property name="text" column="dialogue" />
+		<property name="email" column="email" />
+		<property name="extraverted" column="extrovert" />
+		<property name="intuitive" column="intuitive" />
+		<property name="thinking" column="thinking" />
+		<property name="judgemental" column="judging" />
+	</class>
+</hibernate-mapping>
