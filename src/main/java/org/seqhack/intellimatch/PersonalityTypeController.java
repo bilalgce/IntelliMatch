@@ -27,6 +27,15 @@ public class PersonalityTypeController {
 	public ResponseEntity<PersonalityMatch> getType(@RequestBody Speech speech) {
 
 		String text = speech.getText();
+
+		// Check if user's record already exists
+		boolean recordExists = false;
+		PersonalityType type = DBUtil.getType(speech.getEmail());
+		if (type != null) {
+			text += type.getText();
+			recordExists = true;
+		}
+
 		String processedText = preprocessText(text);
 		KeyWords keywords = KeywordsLoader.loadKeyWords();
 
@@ -48,6 +57,14 @@ public class PersonalityTypeController {
 
 		PersonalityMatch personalityType = new PersonalityMatch(extraverted,
 				intuitive, thinking, judgemental);
+
+		if (!recordExists)
+			DBUtil.addPersonalityType(speech.getFirstName(),
+					speech.getLastName(), speech.getEmail(), processedText,
+					extraverted, intuitive, thinking, judgemental);
+		else
+			DBUtil.updateType(type, processedText, extraverted, intuitive,
+					thinking, judgemental);
 
 		return new ResponseEntity<PersonalityMatch>(personalityType,
 				HttpStatus.OK);
