@@ -1,11 +1,15 @@
 package org.seqhack.intellimatch;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.lang.Math;
 
 import org.seqhack.intellimatch.models.KeyWords;
 import org.seqhack.intellimatch.models.PersonalityMatch;
+import org.seqhack.intellimatch.models.PersonalityMatch.MatchingPersonality;
 import org.seqhack.intellimatch.models.PersonalityType;
 import org.seqhack.intellimatch.models.Speech;
 import org.seqhack.intellimatch.utilities.DBUtil;
@@ -57,6 +61,11 @@ public class PersonalityTypeController {
 
 		PersonalityMatch personalityType = new PersonalityMatch(extraverted,
 				intuitive, thinking, judgemental);
+		personalityType.setEmail(speech.getEmail());
+		personalityType.setFirstName(speech.getFirstName());
+		personalityType.setLastName(speech.getLastName());
+
+		matchmaking(personalityType, DBUtil.getType());
 
 		if (!recordExists)
 			DBUtil.addPersonalityType(speech.getFirstName(),
@@ -122,5 +131,77 @@ public class PersonalityTypeController {
 		for (Map.Entry<String, Integer> entry : wordCount.entrySet())
 			keywordCount += entry.getValue();
 		return keywordCount;
+	}
+
+	public void matchmaking(PersonalityMatch myType,
+			List<PersonalityType> allTypes) {
+		if (allTypes.size() == 0)
+			return;
+		Map<Double, List<Integer>> jellers = new HashMap<Double, List<Integer>>();
+		int i = -1;
+		for (PersonalityType otherType : allTypes) {
+			i += 1;
+			if (otherType.getEmail() == myType.getEmail())
+				continue;
+			Double jelling = jellingFactor(myType, otherType);
+			if (jellers.containsKey(jelling)) {
+				List<Integer> currentScorer = jellers.get(jelling);
+				currentScorer.add(i);
+			} else {
+				List<Integer> jeller = new ArrayList<Integer>();
+				jeller.add(i);
+				jellers.put(jelling, jeller);
+			}
+
+		}
+
+		List<Double> sortedJellingFactors = new ArrayList<Double>();
+		sortedJellingFactors.addAll(jellers.keySet());
+		Collections.sort(sortedJellingFactors);
+		Collections.reverse(sortedJellingFactors);
+
+		List<PersonalityMatch.MatchingPersonality> sortedMatchers = new ArrayList<PersonalityMatch.MatchingPersonality>();
+		for (Double jellingFactor : sortedJellingFactors) {
+			for (Integer jellerIndex : jellers.get(jellingFactor)) {
+				if (allTypes.get(jellerIndex).getEmail() == myType.getEmail())
+					continue;
+				MatchingPersonality personality = new MatchingPersonality();
+				personality.setEmail(allTypes.get(jellerIndex).getEmail());
+				personality.setFirstName(allTypes.get(jellerIndex)
+						.getFirstName());
+				personality
+						.setLastName(allTypes.get(jellerIndex).getLastName());
+				personality.setJellingFactor(jellingFactor);
+				personality.setExtraverted(allTypes.get(jellerIndex)
+						.getExtraverted());
+				personality.setIntuitive(allTypes.get(jellerIndex)
+						.getIntuitive());
+				personality
+						.setThinking(allTypes.get(jellerIndex).getThinking());
+				personality.setJudgemental(allTypes.get(jellerIndex)
+						.getJudgemental());
+				sortedMatchers.add(personality);
+			}
+
+		}
+
+		myType.setMatchers(sortedMatchers);
+
+	}
+
+	public Double jellingFactor(PersonalityMatch myType,
+			PersonalityType otherType) {
+		double jelling = 0;
+		jelling += 100 - Math.abs(myType.getExtraverted()
+				- otherType.getExtraverted());
+		jelling += 100 - Math.abs(myType.getIntuitive()
+				- otherType.getIntuitive());
+		jelling += 100 - Math.abs(myType.getThinking()
+				- otherType.getThinking());
+		jelling += 100 - Math.abs(myType.getJudgemental()
+				- otherType.getJudgemental());
+
+		return jelling / 4;
+
 	}
 }

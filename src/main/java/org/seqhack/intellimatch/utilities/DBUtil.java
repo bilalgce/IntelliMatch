@@ -120,7 +120,6 @@ public class DBUtil {
 
 	public static void updateType(PersonalityType type, String text, Double e,
 			Double n, Double t, Double j) {
-		System.out.println("____________________updateDb");
 		try {
 			factory = new Configuration().configure().buildSessionFactory();
 		} catch (Throwable ex) {
