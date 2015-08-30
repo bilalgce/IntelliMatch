@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.lang.Math;
 
 import org.seqhack.intellimatch.models.KeyWords;
 import org.seqhack.intellimatch.models.PersonalityMatch;
@@ -65,7 +64,16 @@ public class PersonalityTypeController {
 		personalityType.setFirstName(speech.getFirstName());
 		personalityType.setLastName(speech.getLastName());
 
-		matchmaking(personalityType, DBUtil.getType());
+		List<PersonalityType> allMembers = DBUtil.getType();
+		int sameMember = -1;
+		for(int i=0; i<allMembers.size(); i++)
+			if (allMembers.get(i).getEmail().equals(speech.getEmail())) {
+				sameMember = i;
+				break;
+			}
+		allMembers.remove(sameMember);
+				
+		matchmaking(personalityType, allMembers);
 
 		if (!recordExists)
 			DBUtil.addPersonalityType(speech.getFirstName(),
